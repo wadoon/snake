@@ -18,19 +18,33 @@
                 </span>
             </div>
         </div>
+
+        <div id="game-start" style="text-align:center; font-size:150%">
+            Press key to start!
+        </div>
         
         <center>
             <canvas id="gameCanvas" width="600" height="600">
             </canvas>
         </center>
 
-        <div id="overlay"></div> 
+        <div id="overlay">
+            <div id="overlay-inner">
+                
+            </div>
+        </div> 
         
         <style>
          body{
              width:90%;
              padding:0;
              margin:auto;
+         }
+
+         #overlay-inner {
+             background: white;
+             width: 50%;
+             margin: auto;
          }
          
          #gameCanvas {
@@ -96,9 +110,9 @@
          // When set to true the snake is changing direction
          changingDirection: false,
          // Horizontal velocity
-         dx: 10,
+         dx: 0,
          // Vertical velocity
-         dy: 0,
+         dy: 10,
          keys: [65, 87, 68, 83]
          
          // keys: [/*LEFT_KEY*/ 37, 
@@ -110,23 +124,23 @@
 
      let player2 = {
          id: "blue",
-         name: "Blau",
+         name: "Blue",
          SNAKE_COLOUR: 'lightblue',
          SNAKE_BORDER_COLOUR: 'darkblue',
          snake: [
-             {x: 200, y: 150},
-             {x: 190, y: 150},
-             {x: 180, y: 150},
-             {x: 170, y: 150},
-             {x: 160, y: 150}
+             {x: 450, y: 150},
+             {x: 440, y: 150},
+             {x: 430, y: 150},
+             {x: 420, y: 150},
+             {x: 410, y: 150}
          ],
          score: 0,
          // When set to true the snake is changing direction
          changingDirection: false,
          // Horizontal velocity
-         dx: 10,
+         dx: 0,
          // Vertical velocity
-         dy: 0,
+         dy: 10,
          keys: [74, 73, 76, 75]
      }
 
@@ -142,11 +156,19 @@
      const ctx = gameCanvas.getContext("2d");
 
      // Start game
-     main();
+     //main();
      // Create the first food location
      createFood();
-     // Call changeDirection whenever a key is pressed
-     document.addEventListener("keydown", changeDirection);
+
+
+     function gameStart(event) {
+         document.removeEventListener("keydown", gameStart);
+         document.getElementById("game-start").style.visibility = "hidden";
+         document.addEventListener("keydown", changeDirection);
+         main();
+         console.log("game start");
+     }
+     document.addEventListener("keydown", gameStart);
 
 
      /**
@@ -158,6 +180,8 @@
          if (didGameEnd(player1, player2)) return;
          if (didGameEnd(player2, player1)) return;
 
+         let score = Math.max(player1.score, player2.score);
+         
          setTimeout(function onTick() {
              player1.changingDirection = false;
              player2.changingDirection = false;
@@ -170,7 +194,8 @@
 
              // Call game again
              main();
-         }, GAME_SPEED)
+         }, GAME_SPEED - (score/2))
+         
      }
 
      /**
@@ -238,7 +263,10 @@
          let snake = player.snake;
          
          for (let i = 4; i < snake.length; i++) {
-             if (snake[i].x === snake[0].x && snake[i].y === snake[0].y) return true
+             if (snake[i].x === snake[0].x && snake[i].y === snake[0].y) {
+                 setMessage(otherPlayer.name + " wins! <br> " + player.name + " hits the itself.");
+                 return true
+             }
          }
 
          const hitLeftWall = snake[0].x < 0;
@@ -322,8 +350,7 @@
      function setMessage(str) {
          const overlay = document.getElementById("overlay");
          overlay.style.display = "block";
-         overlay.innerHTML = str;
-
+         document.getElementById("overlay-inner").innerHTML = str;
      }
 
      
